@@ -14,3 +14,8 @@ export interface loginModel {
     account:string;
     pw:string;
 }
+
+export interface CreateChatRoomModel {
+    chatNameRoom :string ;
+    member:string[];
+}

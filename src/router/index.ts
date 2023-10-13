@@ -19,6 +19,11 @@ const routes: Array<RouteConfig> = [
     path:'/Login',
     name:'login',
     component:() => import('../views/LoginView.vue')
+  },
+  {
+    path:'/CreateChatRoom',
+    name:'CreateChatRoom',
+    component:() =>import('../views/CreateChatRoomView.vue')
   }
 ]
 

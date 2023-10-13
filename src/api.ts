@@ -23,4 +23,15 @@ export default class loginClass {
             }
         })
     }
+
+    public async createCharRoomApi(chatNameRoomObj:Interface.CreateChatRoomModel):AxiosPromise<any>{
+        return await axios({
+            method:'post',
+            url:`https://localhost:7217/CreateChatRoom`,
+            data:{
+                'chatRoomName':chatNameRoomObj.chatNameRoom,
+                'memberList':chatNameRoomObj.member
+            }
+        })
+    }
 }

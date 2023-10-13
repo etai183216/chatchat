@@ -36,12 +36,13 @@ private async loginSend (){
         pw:this.pwInput
     }
 
-    let myToken= await (await this.apiClass.login(loginObject)).data;
+    const myToken= (await this.apiClass.login(loginObject)).data;
     if(myToken!=='') {
         sessionStorage.setItem("Token", myToken);
         sessionStorage.setItem("nowUser",loginObject.account)
+        alert(myToken)
     }
-    else console.log('錯誤');
+    else alert(myToken);
 }
 
 }

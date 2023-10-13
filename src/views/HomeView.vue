@@ -1,6 +1,9 @@
 <template>
   <div class="home">
-    <h1>你知道......其實首頁沒有任何內容，是為了使用vue router而存在的</h1>
+    <dialog id="homeDialog" ><router-view/></dialog>
+    <div id="contentDiv">
+      <router-link to="CreateChatRoom" >link</router-link>
+    </div>
   </div>
 </template>
 
@@ -8,5 +11,27 @@
 import { Component, Vue } from 'vue-property-decorator';
 
 @Component
-export default class HomeView extends Vue {}
+export default class HomeView extends Vue {
+  private CreateChatRoom() {
+    console.log(document.getElementById('homeDialog'));    
+  }
+
+}
 </script>
+
+<style lang="scss">
+  #contentDiv{
+    display: flex;
+    height: 600px;
+    width:1900px;
+    align-items: center;
+    justify-content:center;
+  }
+  
+  #buildChatRoom {
+    width: 300px;
+    height: 100px;
+  }
+
+  
+</style>
