@@ -1,11 +1,10 @@
+import { Axios, AxiosResponse } from "axios";
 
-import API from './api';
 export default class ws {
-    public webSocket:any;
-    public apiClass = new API();
-    public wsConnect(_userAccount:string) {
-        const flag = this.apiClass.verification();
-        if(!flag) return;
-        this.webSocket = new WebSocket(`wss://localhost:7217/wsConnect/${_userAccount}`);
-    }
+  public webSocket: any;
+  public async wsConnect(_userAccount: string) {
+    this.webSocket = new WebSocket(
+      `wss://localhost:7217/wsConnect/${_userAccount}`
+    );
+  }
 }
