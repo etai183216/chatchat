@@ -68,6 +68,7 @@ import { Component, Vue } from "vue-property-decorator";
 import ws from "../webSocket";
 import * as Interface from "../interface";
 import API from "../api";
+import * as Enum from "../enum";
 
 @Component
 export default class chatView extends Vue {
@@ -77,8 +78,6 @@ export default class chatView extends Vue {
   private inputText = "";
   //現在登入的帳號
   private userId = "";
-  //目前在跟誰說話
-  private talkTo = "";
   //目前點開的聊天室
   private nowChatRoomId = "";
   //目前點開的聊天室的聊天內容
@@ -109,14 +108,14 @@ export default class chatView extends Vue {
 
     //連線成功，就consolelog連線成功，並直接進行一次資料請求
     this.webs.webSocket.onopen = (_data: any) => {
-      console.log(_data);
       this.requireMessage();
     };
 
     //收到伺服器的訊息時使用loadingChat方法把data拿出來
     this.webs.webSocket.onmessage = async (e: any) => {
-      await this.loadingChat(e.data);
-      await this.enterChatRoom(this.nowChatRoomId);
+      await this.wsRouter(e.data);
+      //await this.loadingChat(e.data);
+      // await this.enterChatRoom(this.nowChatRoomId);
     };
 
     //收到伺服器關閉連線通知時，印出關閉訊息
@@ -137,7 +136,7 @@ export default class chatView extends Vue {
 
     //先建立出實體物件，
     const theMessage: Interface.sendMessageModel = {
-      type: "sendMessage",
+      type: Enum.WSRequestType.SendingMessage,
       ContentObject: ContentObject,
       ChatRoomId: this.nowChatRoomId,
     };
@@ -150,9 +149,9 @@ export default class chatView extends Vue {
 
   //請求訊息
   private async requireMessage(): Promise<void> {
-    //這是訊息請求，就是主動跟伺服器說要更新資料，sendMessageModel的結構要再想一下怎麼改
+    //這是訊息請求，就是主動跟伺服器說要撈資料，sendMessageModel的結構要再想一下怎麼改
     const theMessage: Interface.sendMessageModel = {
-      type: "requireMessage",
+      type: Enum.WSRequestType.RequiredAllMessage,
       ContentObject: this.userId,
       ChatRoomId: "",
     };
@@ -163,6 +162,7 @@ export default class chatView extends Vue {
   //產生側邊欄
   private async loadingChat(e: any): Promise<void> {
     //送進來時e已經是從伺服器回傳的data了
+    console.log(e);
     this.entireData = JSON.parse(e);
     //重置一次allChatRoom，因為我是用push的方式將資料加進，所以要先清空，不然會堆疊起來
     this.allChatRoom = [];
@@ -187,11 +187,16 @@ export default class chatView extends Vue {
     this.nowChatArray = [...myChatRoom["chat"]].sort((a, b) =>
       a["ChatTime"] < b["ChatTime"] ? 1 : -1
     );
-    //判斷現在在跟誰說話
-    this.talkTo =
-      myChatRoom["Member"][myChatRoom["Member"][0] === this.userId ? 1 : 0];
     //指定現在的聊天室Id
     this.nowChatRoomId = myChatRoom["Id"];
+  }
+
+  private async wsRouter(objStr: string): Promise<void> {
+    const returnObj: Interface.ReturnModel = JSON.parse(objStr);
+    if (returnObj.entryTypeCode == Enum.WSRequestType.RequiredAllMessage) {
+      console.log(objStr);
+    } else if (returnObj.entryTypeCode == Enum.WSRequestType.SendingMessage)
+      console.log(returnObj.contentObject);
   }
 }
 </script>
