@@ -19,7 +19,7 @@
 import { Component, Vue } from "vue-property-decorator";
 import * as Interface from "../interface";
 import API from "../api";
-
+import * as Enum from "../enum";
 @Component
 export default class loginView extends Vue {
   apiClass = new API();
@@ -33,12 +33,21 @@ export default class loginView extends Vue {
       pw: this.pwInput,
     };
 
-    const myToken = (await this.apiClass.login(loginObject)).data;
-    if (myToken !== "") {
-      sessionStorage.setItem("Token", myToken);
-      sessionStorage.setItem("nowUser", loginObject.account);
-      console.log(myToken);
-    } else alert(myToken);
+    const returnObj: Interface.ApiReturnModel = (
+      await this.apiClass.login(loginObject)
+    ).data;
+
+    if (
+      returnObj === null ||
+      returnObj.returnStatusCode == Enum.ApiReturnType.Error
+    ) {
+      alert("登入失敗");
+      return;
+    }
+
+    sessionStorage.setItem("Token", returnObj.contentObject);
+    sessionStorage.setItem("nowUser", loginObject.account);
+    alert("登入成功");
   }
 }
 </script>

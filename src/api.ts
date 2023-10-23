@@ -36,6 +36,7 @@ export default class loginClass {
       method: "post",
       url: `https://localhost:7217/CreateChatRoom`,
       data: {
+        userid: chatNameRoomObj.userid,
         chatRoomName: chatNameRoomObj.chatNameRoom,
         memberList: chatNameRoomObj.member,
       },
