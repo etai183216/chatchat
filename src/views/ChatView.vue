@@ -5,14 +5,14 @@
         <el-menu-item
           v-for="chatRoom in allChatRoom"
           :key="chatRoom.chatRoomId"
-          @click="enterChatRoom(chatRoom.chatRoomId)"
+          @click="enterChatRoom(chatRoom.Id)"
         >
           <el-row class="chatName">
             <span>{{ chatRoom.chatRoomName }}</span>
           </el-row>
           <el-row class="chatCoontent">
             <el-col :push="2">
-              <span>{{ chatRoom.chatRoomContent }}</span>
+              <span>{{ chatRoom.chat[chatRoom.chat.length - 1].Content }}</span>
             </el-col>
           </el-row>
         </el-menu-item>
@@ -83,12 +83,7 @@ export default class chatView extends Vue {
   //目前點開的聊天室的聊天內容
   private nowChatArray = [];
   //使用者所有聊天室
-  private allChatRoom: {
-    chatRoomId: string;
-    chatRoomName: string;
-    chatRoomContent: string;
-    UpdateTime: string;
-  }[] = [];
+  private allChatRoom: Interface.ChatRoomModel[] = [];
   //全部資料
   private entireData: [] = [];
   private apiClass = new API();
@@ -114,6 +109,7 @@ export default class chatView extends Vue {
     //收到伺服器的訊息時使用loadingChat方法把data拿出來
     this.webs.webSocket.onmessage = async (e: any) => {
       await this.wsRouter(e.data);
+      console.log(123);
       //await this.loadingChat(e.data);
       // await this.enterChatRoom(this.nowChatRoomId);
     };
@@ -128,11 +124,22 @@ export default class chatView extends Vue {
     //按Enter後的送出訊息，ContentObject裡東西要跟後端路由的去向做規格對應，
     //現在是sendMessage就要這個格式，如果是其他flag就可以是其他屬性。
     //為了物件的規格可以是自由的，就先把Content轉成字串，這樣後端就可以在路由導向後再轉成物件做處理
-    const ContentObject = JSON.stringify({
-      sender: this.userId,
-      content: this.inputText,
-      chatTime: new Date(),
-    });
+
+    const newDate: Date = new Date();
+    const chatModel: Interface.ChatModel = {
+      ChatId: "",
+      Sender: this.userId,
+      Content: this.inputText,
+      ChatTime:
+        newDate.getFullYear() +
+        1 +
+        "/" +
+        (newDate.getMonth() + 1) +
+        "/" +
+        newDate.getDate(),
+    };
+
+    const ContentObject = JSON.stringify(chatModel);
 
     //先建立出實體物件，
     const theMessage: Interface.sendMessageModel = {
@@ -162,25 +169,23 @@ export default class chatView extends Vue {
   //產生側邊欄
   private async loadingChat(e: any): Promise<void> {
     //送進來時e已經是從伺服器回傳的data了
+    //console.log(e);
     console.log(e);
-    this.entireData = JSON.parse(e);
+    this.entireData = e;
     //重置一次allChatRoom，因為我是用push的方式將資料加進，所以要先清空，不然會堆疊起來
     this.allChatRoom = [];
     //照著宣告時指定的物件屬性去建立一個物件並push進去
     for (var x of this.entireData) {
-      this.allChatRoom.push({
-        chatRoomId: x["Id"],
-        chatRoomName: x["Member"][x["Member"][0] == this.userId ? 1 : 0],
-        UpdateTime: x["UpdateTime"],
-        chatRoomContent: x["chat"][x["chat"]["length"] - 1]["Content"],
-      });
+      this.allChatRoom.push(x);
     }
   }
 
   //進入聊天室
   private async enterChatRoom(chatRoomId: any): Promise<void> {
     //find(這邊放條件，實際上就是foreach所有值，丟進函數如果retrun true就會被篩出來)
-    const myChatRoom = this.entireData.find((x) => x["Id"] == chatRoomId);
+    const myChatRoom = this.entireData.find(
+      (x: Interface.ChatRoomModel) => x.Id == chatRoomId
+    );
     //防錯，如果沒有這個聊天室就return出去
     if (myChatRoom === undefined) return;
     //指定現在的聊天室內容，為了配合沉底，把陣列照時間降冪
@@ -192,11 +197,24 @@ export default class chatView extends Vue {
   }
 
   private async wsRouter(objStr: string): Promise<void> {
-    const returnObj: Interface.ReturnModel = JSON.parse(objStr);
+    const returnObj: Interface.WsReturnModel = JSON.parse(objStr);
+    console.log(returnObj.entryTypeCode);
     if (returnObj.entryTypeCode == Enum.WSRequestType.RequiredAllMessage) {
-      console.log(objStr);
-    } else if (returnObj.entryTypeCode == Enum.WSRequestType.SendingMessage)
-      console.log(returnObj.contentObject);
+      await this.GetAllMessage(returnObj.contentObject);
+    } else if (returnObj.entryTypeCode == Enum.WSRequestType.SendingMessage) {
+      this.GetOneMessage(returnObj.contentObject);
+      console.log(1);
+    }
+  }
+
+  private async GetAllMessage(objStr: string) {
+    const obj: Interface.ChatRoomModel = JSON.parse(objStr);
+    await this.loadingChat(obj);
+  }
+
+  private async GetOneMessage(objStr: string) {
+    const obj: Interface.ChatRoomModel = JSON.parse(objStr);
+    console.log(obj);
   }
 }
 </script>
