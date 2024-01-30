@@ -7,10 +7,20 @@
           :key="chatRoom.chatRoomId"
           @click="enterChatRoom(chatRoom.Id)"
         >
+<<<<<<< HEAD
           <el-row class="chatRoomContent">
             <el-row class="chatName">{{ chatRoom.chatRoomName }}</el-row>
             <el-row class="chatRoomLatestChat"> </el-row>
             <p :id="chatRoomLatestChat + chatRoom.chatRoomId">123456</p>
+=======
+          <el-row class="chatName">
+            <span>{{ chatRoom.chatRoomName }}</span>
+          </el-row>
+          <el-row class="chatCoontent">
+            <el-col :push="2">
+              <span>{{ chatRoom.chat[chatRoom.chat.length - 1].Content }}</span>
+            </el-col>
+>>>>>>> d138b916148a4ba8c270f8330d4d145719bfcf19
           </el-row>
         </el-menu-item>
       </el-menu>
@@ -107,6 +117,12 @@ export default class chatView extends Vue {
     //收到伺服器的訊息時使用loadingChat方法把data拿出來
     this.webs.webSocket.onmessage = async (e: any) => {
       await this.wsRouter(e.data);
+<<<<<<< HEAD
+=======
+      console.log(123);
+      //await this.loadingChat(e.data);
+      // await this.enterChatRoom(this.nowChatRoomId);
+>>>>>>> d138b916148a4ba8c270f8330d4d145719bfcf19
     };
 
     //收到伺服器關閉連線通知時，印出關閉訊息
@@ -120,13 +136,27 @@ export default class chatView extends Vue {
     //現在是sendMessage就要這個格式，如果是其他flag就可以是其他屬性。
     //為了物件的規格可以是自由的，就先把Content轉成字串，這樣後端就可以在路由導向後再轉成物件做處理
 
+<<<<<<< HEAD
     const currentDate = new Date();
     const formattedDate = format(currentDate, "yyyy/MM/dd HH:mm:ss");
+=======
+    const newDate: Date = new Date();
+>>>>>>> d138b916148a4ba8c270f8330d4d145719bfcf19
     const chatModel: Interface.ChatModel = {
       ChatId: "",
       Sender: this.userId,
       Content: this.inputText,
+<<<<<<< HEAD
       ChatTime: formattedDate,
+=======
+      ChatTime:
+        newDate.getFullYear() +
+        1 +
+        "/" +
+        (newDate.getMonth() + 1) +
+        "/" +
+        newDate.getDate(),
+>>>>>>> d138b916148a4ba8c270f8330d4d145719bfcf19
     };
 
     const ContentObject = JSON.stringify(chatModel);
@@ -159,6 +189,11 @@ export default class chatView extends Vue {
   //產生側邊欄
   private async loadingChat(e: any): Promise<void> {
     //送進來時e已經是從伺服器回傳的data了
+<<<<<<< HEAD
+=======
+    //console.log(e);
+    console.log(e);
+>>>>>>> d138b916148a4ba8c270f8330d4d145719bfcf19
     this.entireData = e;
     //重置一次allChatRoom，因為我是用push的方式將資料加進，所以要先清空，不然會堆疊起來
     this.allChatRoom = [];
@@ -187,11 +222,30 @@ export default class chatView extends Vue {
 
   private async wsRouter(objStr: string): Promise<void> {
     const returnObj: Interface.WsReturnModel = JSON.parse(objStr);
+<<<<<<< HEAD
+=======
+    console.log(returnObj.entryTypeCode);
+>>>>>>> d138b916148a4ba8c270f8330d4d145719bfcf19
     if (returnObj.entryTypeCode == Enum.WSRequestType.RequiredAllMessage) {
       await this.GetAllMessage(returnObj.contentObject);
     } else if (returnObj.entryTypeCode == Enum.WSRequestType.SendingMessage) {
       this.GetOneMessage(returnObj.contentObject);
+<<<<<<< HEAD
     }
+=======
+      console.log(1);
+    }
+  }
+
+  private async GetAllMessage(objStr: string) {
+    const obj: Interface.ChatRoomModel = JSON.parse(objStr);
+    await this.loadingChat(obj);
+  }
+
+  private async GetOneMessage(objStr: string) {
+    const obj: Interface.ChatRoomModel = JSON.parse(objStr);
+    console.log(obj);
+>>>>>>> d138b916148a4ba8c270f8330d4d145719bfcf19
   }
 
   //得到全部訊息只有在首次進入聊天室會發生。
